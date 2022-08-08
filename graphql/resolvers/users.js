@@ -7,7 +7,7 @@ const privateKey = process.env.PRIVATE_KEY;
 
 module.exports = {
   Mutation: {
-    async loginUser(_, { loginInput: { username, email, password } }) {
+    async registerUser(_, { registerInput: { username, email, password } }) {
       const oldUser = await User.findOne({ email });
 
       if (oldUser) {
@@ -42,6 +42,30 @@ module.exports = {
         id: res.id,
         ...res._doc,
       };
+    },
+
+    async loginUser(_, { loginInput: { email, password } }) {
+      const user = await User.findOne({ email });
+
+      if (user && (await bcrypt.compare(password, user.password))) {
+        const token = jwt.sign(
+          {
+            user_id: user._id,
+            email,
+          },
+          privateKey,
+          { expiresIn: "2h" }
+        );
+
+        user.token = token;
+
+        return {
+          id: user.id,
+          ...user._doc,
+        };
+      } else {
+        throw new ApolloError("Email or password incorrect", "INCORRECT_LOGIN");
+      }
     },
   },
   Query: {
