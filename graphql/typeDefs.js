@@ -31,8 +31,10 @@ module.exports = gql`
   }
 
   type Query {
-    message(id: ID!): Message
-    user(id: ID!): User
+    getMessageById(id: ID!): Message
+    getAllMessages: [Message]
+    getUserById(id: ID!): User
+    getCurrentUser: User
   }
 
   type Mutation {

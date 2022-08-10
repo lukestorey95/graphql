@@ -69,6 +69,20 @@ module.exports = {
     },
   },
   Query: {
-    user: (_, { ID }) => User.findById(ID),
+    getCurrentUser: async (parent, args, { user }) => {
+      if (!user) {
+        throw new ApolloError("User not authenticated", "UNAUTHORIZED");
+      }
+      return await User.findById(user.user_id);
+    },
+    getUserById: async (parent, { id }) => {
+      const user = await User.findById(id);
+
+      if (!user) {
+        throw new ApolloError("User not found", "CONTENT_NOT_FOUND");
+      }
+
+      return user;
+    },
   },
 };

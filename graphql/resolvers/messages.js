@@ -1,4 +1,5 @@
 const Message = require("../../models/message");
+const { ApolloError } = require("apollo-server-errors");
 
 module.exports = {
   Mutation: {
@@ -17,6 +18,22 @@ module.exports = {
     },
   },
   Query: {
-    message: (_, { ID }) => Message.findById(ID),
+    getMessageById: async (parent, { id }, context, info) => {
+      const message = await Message.findById(id);
+
+      if (!message) {
+        throw new ApolloError(
+          "Could not find message with ID",
+          "MESSAGE_NOT_FOUND"
+        );
+      }
+
+      return message;
+    },
+    getAllMessages: async (parent, args, context, info) => {
+      const messages = await Message.find();
+
+      return messages;
+    },
   },
 };
